@@ -4,34 +4,27 @@
 #################################################
 
 #################################################
-# MODE RDP
-function mode_startx () {
-## FIXME: change to switch link
-cat << XXX > ~/.xinitrc
-#!/bin/bash
-blackbox &
-remmina -c ~/profile.remmina
-XXX
+# INIT
+VDI_TOOL_PATH=/opt/vdi-tools
 
+
+#################################################
+# MODE RDP
+function mode_remmina_startx () {
+    ln -s -f $VDI_TOOL_PATH/xinitrc.connect ~/.xinitrc
     startx
 }
 
 #################################################
 # MODE EDIT CONF
-function mode_editconf () {
-## FIXME: change to switch link
-cat << XXX > ~/.xinitrc 
-#!/bin/bash
-blackbox &
-remmina
-XXX
-
+function mode_remmina () {
+    ln -s -f $VDI_TOOL_PATH/xinitrc.edit ~/.xinitrc
     startx
 }
 
 #################################################
 # MODE SET CONNECTION PROFILE
-function mode_conprof () {
+function mode_set_prof () {
     ## MAKE LIST
     list=()
     for file in $(ls ~/.remmina/*.remmina)
@@ -41,7 +34,7 @@ function mode_conprof () {
         list+=("OFF")
     done
     ## SHOW DIALOG
-    RET=$(whiptail --title "SELECT A CONNECTION PROFILE" --radiolist "Choose a connection profile" 0 0 0 \
+    RET=$(whiptail --title "SELECT A PROFILE" --radiolist "Choose a connection profile" 0 0 0 \
             ${list[@]} \
             3>&1 1>&2 2>&3)
     ## ACTION
@@ -52,9 +45,8 @@ function mode_conprof () {
 # MODE TERMINAL
 function mode_terminal () {
     ## SHOW DIALOG
-    whiptail --title "TERMINAL MODE" --yesno "Entering Terminal" 0 0 --defaultno 3>&1 1>&2 2>&3
+    whiptail --title "TERMINAL" --yesno "Entering Terminal" 0 0 --defaultno 3>&1 1>&2 2>&3
     RET=$?
-
     ## ACTION
     if [ $RET -eq 0 ]; then ## YES
         exit 0
@@ -67,18 +59,32 @@ function mode_terminal () {
 # MODE PREFERENCE
 function mode_preferences () {
     ## SHOW DIALOG
-    RET=$(whiptail --title "PREFERENCES" --menu "Choose an option" 0 0 0 --ok-button "SELECT" --cancel-button "BACK" \
+    RET=$(whiptail --title "PREFERENCES" --menu "" 0 0 0 --ok-button "SELECT" --cancel-button "BACK" \
             "1 Remmina Menu"                "" \
             "2 Select a Connection Profile" "" \
             "3 Terminal"                    "" \
             3>&1 1>&2 2>&3)
     ## ACTION
     case "$RET" in
-        1\ *)   mode_editconf ;;
-        2\ *)   mode_conprof ;;
+        1\ *)   mode_remmina ;;
+        2\ *)   mode_set_prof ;;
         3\ *)   mode_terminal ;;
         *)      mode_default ;;
     esac
+}
+
+#################################################
+# MODE SHUTDOWN
+function mode_poweroff () {
+    ## SHOW DIALOG
+    whiptail --title "POWEROFF" --yesno "Do you want to poweroff?"
+    RET=$?
+    ## ACTION
+    if [ $RET -eq 0 ]; then ## YES
+        systemctl poweroff -i
+    else
+        : RETURN TO MENU
+    fi
 }
 
 #################################################
@@ -96,19 +102,18 @@ MENU_COUNT_MAX=20
 while :
 do
     ## SHOW DIALOG
-    RET=$(whiptail --title "VDI Configuration Tool" --menu "Choose an option" 0 0 0 --nocancel --ok-button "SELECT" \
+    RET=$(whiptail --title "VDI TOOL" --menu "" 0 0 0 --nocancel --ok-button "SELECT" \
             "1 Connect"     "Remote Desktop" \
             "2 Preferences" "Preference Mode" \
-            "3 Shutdown"    "Shutdown Raspi" \
+            "3 Poweroff"    "Poweroff Raspi" \
             3>&1 1>&2 2>&3)
     ## ACTION
     case "$RET" in
-        1\ *)   mode_startx ;;
+        1\ *)   mode_remmina_startx ;;
         2\ *)   mode_preferences ;;
-        3\ *)   mode_shutdown ;;    ## FIXME: define mode_shutdown
+        3\ *)   mode_poweroff ;;
         *)      mode_default ;;
     esac
-
     ## ESCAPE FOR TEST
     MENU_COUNT=$(( MENU_COUNT +1 ))
     if [ $MENU_COUNT -gt $MENU_COUNT_MAX ]; then
