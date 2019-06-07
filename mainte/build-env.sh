@@ -3,12 +3,12 @@
 #   VDI BUILD ENV
 #################################################
 ## PROXY
-PROXY=http://hostname:port/
-cat > /etc/apt/apt.conf.d/99proxy << EOF
-Acquire::http::Proxy  "$PROXY";
-Acquire::https::Proxy "$PROXY";
-EOF
-APTKEYPX="--keyserver-option http-proxy=$PROXY"
+# PROXY=http://hostname:port/
+# cat > /etc/apt/apt.conf.d/99proxy << EOF
+# Acquire::http::Proxy  "$PROXY";
+# Acquire::https::Proxy "$PROXY";
+# EOF
+# APTKEYPX="--keyserver-option http-proxy=$PROXY"
 
 ## PACKAGE UPDATE
 apt update && \
