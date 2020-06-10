@@ -26,3 +26,6 @@ $ sudo .vdi-tools/mainte/build-env.sh
 3. Select `Preferences > Select a Connection Profile` and choose the profile that you created
 4. Select `Connect`, then start Remote Desktop
 
+## License
+This software is released under the MIT License, see LICENSE.md.
+
